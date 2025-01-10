@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+echo "Argument 1: $1"
+echo "Argument 2: $2"
+echo "$1 $2; $(pwd); $0"
+
+case $1 in
+    "install")
+        echo "Installing $2..."
+        ;;
+    "remove")
+        echo "Removing $2..."
+        ;;
+    *)
+        echo "Wrong argument '$1'"
+        ;;
+esac
+
+$2
