@@ -1,5 +1,22 @@
 #!/usr/bin/env python
 
+# ---------------------------------------------------------------|
+# |                     ~  ~~ ~~~ ~~  ~                          |
+# |             ~  ~~ ~~~ Fust Builder ~~~ ~~  ~                 |
+# |                     ~  ~~ ~~~ ~~  ~                          |
+# |                      Created by Sarkans (Sergei Vishnevecki) |
+# |                                                 License: MIT |
+# |                                                              |
+# ---------------------------------------------------------------|
+# |                                                              |
+# | This script was created because I was sick of writing        |
+# | a separate Bash file for each new C/C++ project that         |
+# | would compile my project (not to mention manual compilation, |
+# | entering command after command in the terminal).             |
+# | If you find this script useful, use it in good health.       |
+# |                                                              |
+# ---------------------------------------------------------------|
+
 import os
 import sys
 import configparser
@@ -25,6 +42,7 @@ global path_src
 global path_lib
 global path_build
 
+# Return a success or an error
 def rtn(code, msg):
     MSG_SUC = CYLW+SBLD+'Fust'+S0+' ['+CGRN+'0'+S0+']: '
     MSG_ERR = CYLW+SBLD+'Fust'+S0+' ['+CRED+'1'+S0+']: '
@@ -34,6 +52,7 @@ def rtn(code, msg):
     else:
         print(MSG_ERR + msg)
 
+# Show me the help message!
 def help():
     print(CYLW+SBLD+'Fust Builder manual\n'+S0)
 
@@ -54,6 +73,7 @@ def help():
     print(CBLU+SITL+'\t[OPTIONS]'+S0+':')
     print('\t\t'+CYLW+SITL+'compiler options'+S0+'   ---   Additional compiler options, such as -lm, to include the \'math.h\' library. '+SBLD+'To enter multiple options, use quotes like \'-lm -Wall\' or "-lm -Wall".'+S0)
 
+# Trying to load a config
 def loadconfig():
     config = configparser.ConfigParser()
 
@@ -92,6 +112,7 @@ def loadconfig():
         path_lib = 'lib'
         path_build = 'build'
 
+# Make a specific config file for your project
 def mkconfig(conf_path):
     try:
         _f = open(conf_path + '/fust.config', 'w')
@@ -103,9 +124,11 @@ def mkconfig(conf_path):
     except:
         rtn(1, 'Unexcepted error.')
 
+# Let's goooo
 def main():
     loadconfig()
 
+    # God, why does not Python have switch-case?
     if len(sys.argv) > 1 and len(sys.argv) < limArg:
         if sys.argv[1] == 'help':
             help()
