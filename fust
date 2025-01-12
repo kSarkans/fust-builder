@@ -17,6 +17,7 @@
 # |                                                              |
 # ---------------------------------------------------------------|
 
+# TODO: Add argument parser for human beings
 import os
 import sys
 import configparser
@@ -44,13 +45,16 @@ global path_build
 
 # Return a success or an error
 def rtn(code, msg):
-    MSG_SUC = CYLW+SBLD+'Fust'+S0+' ['+CGRN+'0'+S0+']: '
-    MSG_ERR = CYLW+SBLD+'Fust'+S0+' ['+CRED+'1'+S0+']: '
+    MSG = '['+CYLW+'M'+S0+'] '+CYLW+SBLD+'Fust'+S0+': '
+    MSG_SUC = '['+CGRN+str(code)+S0+'] '+CYLW+SBLD+'Fust'+S0+': '
+    MSG_ERR = '['+CRED+str(code)+S0+'] '+CYLW+SBLD+'Fust'+S0+': '
     
     if code == 0:
-        print(MSG_SUC + msg)
+        print(MSG_SUC + CGRN + msg + S0)
+    elif code == 2:
+        print(MSG + msg)
     else:
-        print(MSG_ERR + msg)
+        print(MSG_ERR + CRED + msg + S0)
 
 # Show me the help message!
 def help():
@@ -71,11 +75,16 @@ def help():
     print('\t\t'+CYLW+SITL+'path'+S0+'\t  ---   The path '+SBLD+'(eg /home/user/project)'+S0+' is specified to \'mkconfig\' in the first argument if you want to specify a different path for the config file than the one you are currently in. ')
 
     print(CBLU+SITL+'\t[OPTIONS]'+S0+':')
-    print('\t\t'+CYLW+SITL+'compiler options'+S0+'   ---   Additional compiler options, such as -lm, to include the \'math.h\' library. '+SBLD+'To enter multiple options, use quotes like \'-lm -Wall\' or "-lm -Wall".'+S0)
+    print('\t\t'+CYLW+SITL+'compiler options'+S0+'   ---   Additional compiler options, such as -lm. '+SBLD+'To enter multiple options, use quotes like \'-lm -Wall\' or "-lm -Wall".'+S0)
 
 # Trying to load a config
 def loadconfig():
     config = configparser.ConfigParser()
+    global path
+    global exe_name
+    global path_src
+    global path_lib
+    global path_build
 
     # Try to get config. If failed then load default values
     try:
@@ -102,27 +111,98 @@ def loadconfig():
             path_lib = 'lib'
 
         try:
-            path_build = config.get('Project', 'build')
+            path_build = config.get('Project', 'bin')
         except:
-            path_build = 'build'
+            path_build = 'bin'
     except:
         path = os.getcwd()
         exe_name = 'a.out'
         path_src = 'src'
         path_lib = 'lib'
-        path_build = 'build'
+        path_build = 'bin'
 
 # Make a specific config file for your project
 def mkconfig(conf_path):
     try:
         _f = open(conf_path + '/fust.config', 'w')
-        _f.write('[Project]\n;path = /home/user/project\nexe = a.out\nsrc = src\nlib = lib')
+        _f.write('[Project]\n; Directory to your project. By default, this is the directory from which you run fust.\n;path = /home/user/project\n\n; The name of the executable file to be compiled.\nexe = a.out\n\n; The name of the folder where the source files are stored in your project directory.\nsrc = src\n\n; The name of the folder where header files are stored in your project directory.\nlib = lib\n\n; The name of the folder where your project will be compiled.\nbin = bin')
         _f.close()
         rtn(0, 'Config created at \''+conf_path+'/fust.config\'')
     except PermissionError:
         rtn(1, 'Permission denied: \''+conf_path+'/fust.config\'.')
     except:
         rtn(1, 'Unexcepted error.')
+
+# Let's build our project!
+def build(compiler):
+    global path
+    global exe_name
+    global path_src
+    global path_lib
+    global path_build
+
+    if sys.argv[1] != 'pdebug':
+        rtn(2, 'Trying to compile code into \'' + path + '/' + path_build+'/'+exe_name+'\'')
+        os.system('mkdir -p ' + path + '/' + path_build)
+        if len(sys.argv) > 3:
+            if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c* '+sys.argv[3]):
+                os.system('chmod +x '+path+'/'+path_build+'/'+exe_name)
+                rtn(0, 'The executable was compiled at path: \''+path+'/'+path_build+'/'+exe_name+'\'')
+            else:
+                rtn(1, 'The executable was not compiled.')
+                sys.exit()
+        else:
+            if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c*'):
+                os.system('chmod +x '+path+'/'+path_build+'/'+exe_name)
+                rtn(0, 'The executable was compiled at path: \''+path+'/'+path_build+'/'+exe_name+'\'')
+            else:
+                rtn(1, 'The executable was not compiled.')
+                sys.exit()
+    else:
+        rtn(2, 'Trying to compile code into \'' + path + '/'+exe_name+'\'')
+        if len(sys.argv) > 3:
+            if not os.system(compiler+' -o '+path+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c* '+sys.argv[3]):
+                os.system('chmod +x '+path+'/'+exe_name)
+                rtn(0, 'The executable was compiled at path: \''+path+'/'+exe_name+'\'')
+            else:
+                rtn(1, 'The executable was not compiled.')
+                sys.exit()
+        else:
+            if not os.system(compiler+' -o '+path+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c*'):
+                os.system('chmod +x '+path+'/'+exe_name)
+                rtn(0, 'The executable was compiled at path: \''+path+'/'+exe_name+'\'')
+            else:
+                rtn(1, 'The executable was not compiled.')
+                sys.exit()
+
+# Test it (1)
+def debug(compiler):
+    try:
+        build(compiler)
+        rtn(2, 'Trying to start executable at \''+path+'/'+path_build+'/'+exe_name+'\'...\n')
+        if not os.system(path+'/'+path_build+'/'+exe_name):
+            print('')
+            rtn(0, 'Success!')
+        else:
+            print('')
+            rtn(1, 'Something gone wrong...')
+    except not sys.exit():
+        rtn(1, 'There is no third argument to the compiler.')
+
+# Test it (2)
+def pdebug(compiler):
+    try:
+        build(compiler)
+        rtn(2, 'Trying to start executable at \''+path+'/'+exe_name+'\'...\n')
+        if not os.system(path+'/'+exe_name):
+            os.system('rm '+path+'/'+exe_name)
+            print('')
+            rtn(0, 'Success!')
+        else:
+            print('')
+            rtn(1, 'Something gone wrong...')
+    except not sys.exit():
+        rtn(1, 'There is no third argument to the compiler.')
 
 # Let's goooo
 def main():
@@ -142,6 +222,36 @@ def main():
                     rtn(1, 'Unexcepted error.')
             else:
                 mkconfig(os.getcwd())
+        elif sys.argv[1] == 'build':
+            if len(sys.argv) < 3:
+                rtn(1, 'Compiler is not definied.')
+            else:
+                if sys.argv[2] == 'g++':
+                    build('g++')
+                elif sys.argv[2] == 'gcc':
+                    build('gcc')
+                else:
+                    rtn(1, 'There is no compiler named \''+sys.argv[2]+'\'.')
+        elif sys.argv[1] == 'debug':
+            if len(sys.argv) < 3:
+                rtn(1, 'Compiler is not definied.')
+            else:
+                if sys.argv[2] == 'g++':
+                    debug('g++')
+                elif sys.argv[2] == 'gcc':
+                    debug('gcc')
+                else:
+                    rtn(1, 'There is no compiler named \''+sys.argv[2]+'\'.')
+        elif sys.argv[1] == 'pdebug':
+            if len(sys.argv) < 3:
+                rtn(1, 'Compiler is not definied.')
+            else:
+                if sys.argv[2] == 'g++':
+                    pdebug('g++')
+                elif sys.argv[2] == 'gcc':
+                    pdebug('gcc')
+                else:
+                    rtn(1, 'There is no compiler named \''+sys.argv[2]+'\'.')
         else:
             rtn(1, 'Invalid argument \''+sys.argv[1]+'\'. Type \'fust help\' to display manual.')
     elif len(sys.argv) < 2:
