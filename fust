@@ -17,7 +17,6 @@
 # |                                                              |
 # ---------------------------------------------------------------|
 
-# TODO: Add argument parser for human beings
 import os
 import sys
 import configparser
@@ -36,7 +35,7 @@ CCYN = '\033[36m'
 CYLW = '\033[33m'
 
 # Variables
-limArg = 4
+_version = '1.0'
 global path
 global exe_name
 global path_src
@@ -45,13 +44,26 @@ global path_build
 
 # Return a success or an error
 def rtn(code, msg):
+    # Error codes:
+    # 1   --  Unexcepted error.
+    # 2   --  No such directory.
+    # 3   --  Compiler is not definied.
+    # 4   --  There is no compiler named.
+    # 5   --  Invalid argument.
+    # 6   --  No argument.
+    # 7   --  There is no third argument to the compiler.
+    # 8   --  The executable was not compiled.
+    # 9   --  Wrong option.
+    # 10  --  Invalid syntax.
+    # 11  --  Permission denied.
+
     MSG = '['+CYLW+'M'+S0+'] '+CYLW+SBLD+'Fust'+S0+': '
     MSG_SUC = '['+CGRN+str(code)+S0+'] '+CYLW+SBLD+'Fust'+S0+': '
     MSG_ERR = '['+CRED+str(code)+S0+'] '+CYLW+SBLD+'Fust'+S0+': '
     
     if code == 0:
         print(MSG_SUC + CGRN + msg + S0)
-    elif code == 2:
+    elif code == 'M':
         print(MSG + msg)
     else:
         print(MSG_ERR + CRED + msg + S0)
@@ -64,10 +76,15 @@ def help():
 
     print(CCYN+'\t[ARGUMENT_1]'+S0+':')
     print('\t\t'+CYLW+'help'+S0+'\t  ---   Display this manual.')
+    print('\t\t'+CYLW+'├─ --help'+S0)
+    print('\t\t'+CYLW+'└─ -h'+S0)
     print('\t\t'+CYLW+'mkconfig'+S0+'  ---   Create a project config file. '+CRED+SBLD+'Will override existing file!'+S0)
     print('\t\t'+CYLW+'debug'+S0+'\t  ---   Perform debugging. Creates an executable file in the project folder at \'project-path/build/\' and runs it immediately.')
     print('\t\t'+CYLW+'pdebug'+S0+'\t  ---   Pure debugging. Does the same as \'debug\', but leaves no executable files behind.')
     print('\t\t'+CYLW+'build'+S0+'\t  ---   Builds the project into an executable file at \'project-path/build/\'.')
+    print('\t\t'+CYLW+'version'+S0+'\t  ---   Show current Fust version')
+    print('\t\t'+CYLW+'├─ --version'+S0)
+    print('\t\t'+CYLW+'└─ -v'+S0)
 
     print(CPRP+'\t[ARGUMENT_2]'+S0+':')
     print('\t\t'+CYLW+'gcc'+S0+'\t  ---   Use gcc as compiler.')
@@ -75,7 +92,12 @@ def help():
     print('\t\t'+CYLW+SITL+'path'+S0+'\t  ---   The path '+SBLD+'(eg /home/user/project)'+S0+' is specified to \'mkconfig\' in the first argument if you want to specify a different path for the config file than the one you are currently in. ')
 
     print(CBLU+SITL+'\t[OPTIONS]'+S0+':')
-    print('\t\t'+CYLW+SITL+'compiler options'+S0+'   ---   Additional compiler options, such as -lm. '+SBLD+'To enter multiple options, use quotes like \'-lm -Wall\' or "-lm -Wall".'+S0)
+    print('\t\t'+CYLW+SITL+'compiler options'+S0+'   ---   Additional compiler options, such as -lm. '+SBLD+'To enter multiple options, use quotes like \'-lm -Wall\' or "-lm -Wall".'+S0+' If you want to use subsequent options but do not want to add compiler options, specify \'def\' (eg \'fust debug g++ def --src=Source --lib=Library --bin=Build\').')
+    print('\t\t'+CYLW+'--path='+SITL+'dir'+S0+'\t   ---   Use a specific project path instead of the current path in the terminal or specified in the config file.'+S0)
+    print('\t\t'+CYLW+'--exe='+SITL+'name'+S0+'\t   ---   Use a specific executable name instead of default or specified in the config file.'+S0)
+    print('\t\t'+CYLW+'--src='+SITL+'local_dir'+S0+'\t   ---   Use a specific source path instead of default or specified in the config file.'+S0)
+    print('\t\t'+CYLW+'--lib='+SITL+'local_dir'+S0+'\t   ---   Use a specific library path instead of default or specified in the config file.'+S0)
+    print('\t\t'+CYLW+'--bin='+SITL+'local_dir'+S0+'\t   ---   Use a specific build path instead of default or specified in the config file.'+S0)
 
 # Trying to load a config
 def loadconfig():
@@ -129,7 +151,7 @@ def mkconfig(conf_path):
         _f.close()
         rtn(0, 'Config created at \''+conf_path+'/fust.config\'')
     except PermissionError:
-        rtn(1, 'Permission denied: \''+conf_path+'/fust.config\'.')
+        rtn(11, 'Permission denied: \''+conf_path+'/fust.config\'.')
     except:
         rtn(1, 'Unexcepted error.')
 
@@ -141,45 +163,78 @@ def build(compiler):
     global path_lib
     global path_build
 
+    for i in range(4, len(sys.argv)):
+        r = sys.argv[i]
+        if r[0] == '-' and r[1] == '-':
+            if r[2]=='e' and r[3]=='x' and r[4]=='e' and r[5]=='=':
+                exe_name = ''
+                for j in range(6, len(r)):
+                    exe_name = exe_name + r[j]
+                    print(exe_name)
+            elif r[2]=='p' and r[3]=='a' and r[4]=='t' and r[5]=='h' and r[6]=='=':
+                path = ''
+                for j in range(7, len(r)):
+                    path = path + r[j]
+                    print(path)
+            elif r[2]=='s' and r[3]=='r' and r[4]=='c' and r[5]=='=':
+                path_src = ''
+                for j in range(7, len(r)):
+                    path_src = path_src + r[j]
+                    print(path_src)
+            elif r[2]=='l' and r[3]=='i' and r[4]=='b' and r[5]=='=':
+                path_lib = ''
+                for j in range(7, len(r)):
+                    path_lib = path_lib + r[j]
+                    print(path_lib)
+            elif r[2]=='b' and r[3]=='i' and r[4]=='n' and r[5]=='=':
+                path_build = ''
+                for j in range(7, len(r)):
+                    path_build = path_build + r[j]
+                    print(path_build)
+            else:
+                rtn(9, 'Wrong option \''+r+'\'. This option will not be applied.')
+        else:
+            rtn(10, 'Invalid syntax. \''+r+'\': options must start with --.  Type \'fust help\' to display manual.')
+
     if sys.argv[1] != 'pdebug':
-        rtn(2, 'Trying to compile code into \'' + path + '/' + path_build+'/'+exe_name+'\'')
+        rtn('M', 'Trying to compile code into \'' + path + '/' + path_build+'/'+exe_name+'\'')
         os.system('mkdir -p ' + path + '/' + path_build)
-        if len(sys.argv) > 3:
+        if len(sys.argv) > 3 and not sys.argv[3] == 'def':
             if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c* '+sys.argv[3]):
                 os.system('chmod +x '+path+'/'+path_build+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+path_build+'/'+exe_name+'\'')
             else:
-                rtn(1, 'The executable was not compiled.')
+                rtn(8, 'The executable was not compiled.')
                 sys.exit()
         else:
             if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c*'):
                 os.system('chmod +x '+path+'/'+path_build+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+path_build+'/'+exe_name+'\'')
             else:
-                rtn(1, 'The executable was not compiled.')
+                rtn(8, 'The executable was not compiled.')
                 sys.exit()
     else:
-        rtn(2, 'Trying to compile code into \'' + path + '/'+exe_name+'\'')
-        if len(sys.argv) > 3:
+        rtn('M', 'Trying to compile code into \'' + path + '/'+exe_name+'\'')
+        if len(sys.argv) > 3 and not sys.argv[3] == 'def':
             if not os.system(compiler+' -o '+path+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c* '+sys.argv[3]):
                 os.system('chmod +x '+path+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+exe_name+'\'')
             else:
-                rtn(1, 'The executable was not compiled.')
+                rtn(8, 'The executable was not compiled.')
                 sys.exit()
         else:
             if not os.system(compiler+' -o '+path+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c*'):
                 os.system('chmod +x '+path+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+exe_name+'\'')
             else:
-                rtn(1, 'The executable was not compiled.')
+                rtn(8, 'The executable was not compiled.')
                 sys.exit()
 
 # Test it (1)
 def debug(compiler):
     try:
         build(compiler)
-        rtn(2, 'Trying to start executable at \''+path+'/'+path_build+'/'+exe_name+'\'...\n')
+        rtn('M', 'Trying to start executable at \''+path+'/'+path_build+'/'+exe_name+'\'...\n')
         if not os.system(path+'/'+path_build+'/'+exe_name):
             print('')
             rtn(0, 'Success!')
@@ -187,13 +242,13 @@ def debug(compiler):
             print('')
             rtn(1, 'Something gone wrong...')
     except not sys.exit():
-        rtn(1, 'There is no third argument to the compiler.')
+        rtn(7, 'There is no third argument to the compiler.')
 
 # Test it (2)
 def pdebug(compiler):
     try:
         build(compiler)
-        rtn(2, 'Trying to start executable at \''+path+'/'+exe_name+'\'...\n')
+        rtn('M', 'Trying to start executable at \''+path+'/'+exe_name+'\'...\n')
         if not os.system(path+'/'+exe_name):
             os.system('rm '+path+'/'+exe_name)
             print('')
@@ -202,62 +257,62 @@ def pdebug(compiler):
             print('')
             rtn(1, 'Something gone wrong...')
     except not sys.exit():
-        rtn(1, 'There is no third argument to the compiler.')
+        rtn(7, 'There is no third argument to the compiler.')
 
 # Let's goooo
 def main():
     loadconfig()
 
     # God, why does not Python have switch-case?
-    if len(sys.argv) > 1 and len(sys.argv) < limArg:
-        if sys.argv[1] == 'help':
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'help' or sys.argv[1] == '--help' or sys.argv[1] == '-h':
             help()
         elif sys.argv[1] == 'mkconfig':
             if len(sys.argv) > 2 and sys.argv[2] != None:
                 try:
                     mkconfig(str(sys.argv[2]))
                 except FileNotFoundError:
-                    rtn(1, 'No such directory \''+str(sys.argv[2])+'\'')
+                    rtn(2, 'No such directory \''+str(sys.argv[2])+'\'')
                 except:
                     rtn(1, 'Unexcepted error.')
             else:
                 mkconfig(os.getcwd())
         elif sys.argv[1] == 'build':
             if len(sys.argv) < 3:
-                rtn(1, 'Compiler is not definied.')
+                rtn(3, 'Compiler is not definied.')
             else:
                 if sys.argv[2] == 'g++':
                     build('g++')
                 elif sys.argv[2] == 'gcc':
                     build('gcc')
                 else:
-                    rtn(1, 'There is no compiler named \''+sys.argv[2]+'\'.')
+                    rtn(4, 'There is no compiler named \''+sys.argv[2]+'\'.')
         elif sys.argv[1] == 'debug':
             if len(sys.argv) < 3:
-                rtn(1, 'Compiler is not definied.')
+                rtn(3, 'Compiler is not definied.')
             else:
                 if sys.argv[2] == 'g++':
                     debug('g++')
                 elif sys.argv[2] == 'gcc':
                     debug('gcc')
                 else:
-                    rtn(1, 'There is no compiler named \''+sys.argv[2]+'\'.')
+                    rtn(4, 'There is no compiler named \''+sys.argv[2]+'\'.')
         elif sys.argv[1] == 'pdebug':
             if len(sys.argv) < 3:
-                rtn(1, 'Compiler is not definied.')
+                rtn(3, 'Compiler is not definied.')
             else:
                 if sys.argv[2] == 'g++':
                     pdebug('g++')
                 elif sys.argv[2] == 'gcc':
                     pdebug('gcc')
                 else:
-                    rtn(1, 'There is no compiler named \''+sys.argv[2]+'\'.')
+                    rtn(4, 'There is no compiler named \''+sys.argv[2]+'\'.')
+        elif sys.argv[1] == 'version' or sys.argv[1] == '--version' or sys.argv[1] == '-v':
+            print('Fust v' + _version)
         else:
-            rtn(1, 'Invalid argument \''+sys.argv[1]+'\'. Type \'fust help\' to display manual.')
+            rtn(5, 'Invalid argument \''+sys.argv[1]+'\'. Type \'fust help\' to display manual.')
     elif len(sys.argv) < 2:
-        rtn(1, 'No argument. Type \'fust help\' to display manual.')
-    elif len(sys.argv) >= limArg:
-        rtn(1, 'Too many arguments ('+str(len(sys.argv))+'). Type \'fust help\' to display manual.')
+        rtn(6, 'No argument. Type \'fust help\' to display manual.')
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

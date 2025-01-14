@@ -4,3 +4,4 @@ This script was created because I was sick of writing a separate Bash file for e
 ---
 
 *Sarkans (Sergei Vishnevecki), MIT License*
+*Last version: v1.0*
