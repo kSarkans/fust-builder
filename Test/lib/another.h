@@ -1,6 +1,3 @@
-#include <iostream>
+#include <stdio.h>
 
-namespace yourns
-{
-    void hello(void);
-}
+void hello(void);

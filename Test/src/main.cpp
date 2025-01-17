@@ -3,7 +3,7 @@
 
 int main()
 {
-    yourns::hello();
+    hello();
 
     return 0;
 }

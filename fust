@@ -89,6 +89,8 @@ def help():
     print(CPRP+'\t[ARGUMENT_2]'+S0+':')
     print('\t\t'+CYLW+'gcc'+S0+'\t  ---   Use gcc as compiler.')
     print('\t\t'+CYLW+'g++'+S0+'\t  ---   Use g++ as compiler.')
+    print('\t\t'+CYLW+'clang'+S0+'\t  ---   Use clang as compiler.')
+    print('\t\t'+CYLW+'clang++'+S0+'\t  ---   Use clang++ as compiler.')
     print('\t\t'+CYLW+SITL+'path'+S0+'\t  ---   The path '+SBLD+'(eg /home/user/project)'+S0+' is specified to \'mkconfig\' in the first argument if you want to specify a different path for the config file than the one you are currently in. ')
 
     print(CBLU+SITL+'\t[OPTIONS]'+S0+':')
@@ -195,14 +197,14 @@ def build(compiler):
         rtn('M', 'Trying to compile code into \'' + path + '/' + path_build+'/'+exe_name+'\'')
         os.system('mkdir -p ' + path + '/' + path_build)
         if len(sys.argv) > 3 and not sys.argv[3] == 'def':
-            if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c* '+sys.argv[3]):
+            if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -I '+path+'/'+path_lib+' -g '+path+'/'+path_src+'/*.c?? '+sys.argv[3]):
                 os.system('chmod +x '+path+'/'+path_build+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+path_build+'/'+exe_name+'\'')
             else:
                 rtn(8, 'The executable was not compiled.')
                 sys.exit()
         else:
-            if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c*'):
+            if not os.system(compiler+' -o '+path+'/'+path_build+'/'+exe_name+' -I '+path+'/'+path_lib+' -g '+path+'/'+path_src+'/*.c??'):
                 os.system('chmod +x '+path+'/'+path_build+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+path_build+'/'+exe_name+'\'')
             else:
@@ -211,14 +213,14 @@ def build(compiler):
     else:
         rtn('M', 'Trying to compile code into \'' + path + '/'+exe_name+'\'')
         if len(sys.argv) > 3 and not sys.argv[3] == 'def':
-            if not os.system(compiler+' -o '+path+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c* '+sys.argv[3]):
+            if not os.system(compiler+' -o '+path+'/'+exe_name+' -I '+path+'/'+path_lib+' -g '+path+'/'+path_src+'/*.c?? '+sys.argv[3]):
                 os.system('chmod +x '+path+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+exe_name+'\'')
             else:
                 rtn(8, 'The executable was not compiled.')
                 sys.exit()
         else:
-            if not os.system(compiler+' -o '+path+'/'+exe_name+' -Wall -I '+path+'/'+path_lib+' '+path+'/'+path_src+'/*.c*'):
+            if not os.system(compiler+' -o '+path+'/'+exe_name+' -I '+path+'/'+path_lib+' -g '+path+'/'+path_src+'/*.c??'):
                 os.system('chmod +x '+path+'/'+exe_name)
                 rtn(0, 'The executable was compiled at path: \''+path+'/'+exe_name+'\'')
             else:
@@ -280,6 +282,10 @@ def main():
                     build('g++')
                 elif sys.argv[2] == 'gcc':
                     build('gcc')
+                elif sys.argv[2] == 'clang':
+                    build('clang')
+                elif sys.argv[2] == 'clang++':
+                    build('clang++')
                 else:
                     rtn(4, 'There is no compiler named \''+sys.argv[2]+'\'.')
         elif sys.argv[1] == 'debug':
@@ -290,6 +296,10 @@ def main():
                     debug('g++')
                 elif sys.argv[2] == 'gcc':
                     debug('gcc')
+                elif sys.argv[2] == 'clang':
+                    debug('clang')
+                elif sys.argv[2] == 'clang++':
+                    debug('clang++')
                 else:
                     rtn(4, 'There is no compiler named \''+sys.argv[2]+'\'.')
         elif sys.argv[1] == 'pdebug':
@@ -300,6 +310,10 @@ def main():
                     pdebug('g++')
                 elif sys.argv[2] == 'gcc':
                     pdebug('gcc')
+                elif sys.argv[2] == 'clang':
+                    pdebug('clang')
+                elif sys.argv[2] == 'clang++':
+                    pdebug('clang++')
                 else:
                     rtn(4, 'There is no compiler named \''+sys.argv[2]+'\'.')
         elif sys.argv[1] == 'version' or sys.argv[1] == '--version' or sys.argv[1] == '-v':
