@@ -171,7 +171,7 @@ def loadconfig():
 def mkconfig(conf_path):
     try:
         _f = open(f"{conf_path}/fust.ini", "w")
-        _f.write("[Project]\n; Directory to your project. By default, this is the directory from which you run fust.\n;path = /home/user/project\n\n; The name of the executable file to be compiled.\nexe = a.out\n\n; The name of the folder where the source files are stored in your project directory.\nsrc = src\n\n; The name of the folder where header files are stored in your project directory.\ninclude = include\n\n; The name of the folder where your project will be compiled.\nbin = bin\n\n; Compiler arguments\n;args = -Wall -lm")
+        _f.write("[Project]\n; Directory to your project. By default, this is the directory from which you run fust.\n;path = /home/user/project\n\n; The name of the executable file to be compiled.\nexe = a.out\n\n; The name of the folder where the source files are stored in your project directory.\nsrc = src\n\n; The name of the folder where header files are stored in your project directory.\ninclude = include\n\n; The name of the folder where libraries are stored in your project directory.\nlib = lib\n\n; The name of the folder where your project will be compiled.\nbin = bin\n\n; Compiler arguments\n;args = -Wall -lm")
         _f.close()
         rtn(0, f"Config created at '{conf_path}/fust.ini'")
     except PermissionError:
