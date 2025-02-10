@@ -78,5 +78,3 @@ fust -h
 ---
 
 *Sarkans (Sergei Vishnevecki), MIT License*
-
-*Last version: v1.0*
