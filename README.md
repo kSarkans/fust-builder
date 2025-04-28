@@ -8,7 +8,7 @@ This script was created because I was sick of writing a separate Bash file for e
 Just copy this command and paste it into the terminal:
 
 ```bash
-git clone https://github.com/kSarkans/fust-builder.git && cd ./fust-builder && sh install
+git clone https://github.com/kSarkans/fust-builder.git && cd ./fust-builder && sh ./install.sh
 ```
 
 ## Method #2
@@ -22,7 +22,7 @@ git clone https://github.com/kSarkans/fust-builder.git
 Then run the script located inside the cloned repository
 
 ```bash
-sh install
+sh ./install.sh
 ```
 
 Or you can do everything manually
